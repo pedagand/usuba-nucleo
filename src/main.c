@@ -62,6 +62,7 @@ UART_HandleTypeDef UartHandle;
 #endif /* __GNUC__ */
 static void SystemClock_Config(void);
 static void Error_Handler(void);
+static unsigned long get_cycle_count();
 
 /* Private functions ---------------------------------------------------------*/
 
@@ -106,9 +107,16 @@ int main(void)
     /* Initialization Error */
     Error_Handler(); 
   }
-  
+
+  unsigned long t1 = get_cycle_count();
+  volatile int loopCount = 1000;
+
+  while (loopCount--);
+
+  unsigned long t2 = get_cycle_count();
+
   /* Output a message on Hyperterminal using printf function */
-  printf("\n\r UART Printf Example: retarget the C library printf function to the UART\n\r");
+  printf("\n\r Cycles: %lu\n\r", t2 - t1);
 
   /* Infinite loop */ 
   while (1)
@@ -234,3 +242,55 @@ void assert_failed(uint8_t* file, uint32_t line)
   */ 
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
+
+
+ /**
+  *
+  * Portions COPYRIGHT 2018 STMicroelectronics
+  * Copyright (C) 2006-2015, ARM Limited, All Rights Reserved
+  *
+  ******************************************************************************
+  * @file    timing_alt_template.c[
+  * @author  MCD Application Team
+  * @brief   mbedtls alternate timing functions implementation.
+  *          mbedtls timing API is implemented using the CMSIS-RTOS v1/v2 API
+  *          this file has to be reamed to timing_alt.c and copied under
+  *          the project tree.
+  ******************************************************************************
+  *
+  * Licensed under the Apache License, Version 2.0 (the "License"); you may
+  * not use this file except in compliance with the License.
+  * You may obtain a copy of the License at
+  * http://www.apache.org/licenses/LICENSE-2.0
+  */
+
+static unsigned long get_cycle_count()
+{
+   /* retrieve the CPU cycles using the Cortex-M DWT->CYCCNT register
+    * avaialable only starting from CM3
+    */
+
+#if (__CORTEX_M >= 0x03U)
+    static int dwt_started = 0;
+    if( dwt_started == 0 )
+    {
+      dwt_started = 1;
+      /* Enable Tracing */
+        CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+#if (__CORTEX_M == 0x07U)
+        /* in Cortex M7, the trace needs to be unlocked
+         * via the DWT->LAR register with 0xC5ACCE55 value
+         */
+        DWT->LAR = 0xC5ACCE55;
+#endif
+        DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
+
+      /* Reset counter */
+      DWT->CYCCNT = 0;
+    }
+
+    return (unsigned long)DWT->CYCCNT;
+#else
+    return 0;
+#endif
+}
