@@ -112,13 +112,15 @@ int main(void)
 
   for (int i = 0; i < 20; i++){
 
+    printf("[Run: %d] ", i);
+
     unsigned long t1 = get_cycle_count();
 
     bench_speed();
 
     unsigned long t2 = get_cycle_count();
 
-    printf("\n\r Cycles: %lu\n\r", t2 - t1);
+    printf("%lu cycles\n\r", t2 - t1);
 
   }
 
