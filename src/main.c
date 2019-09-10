@@ -37,6 +37,8 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 
+extern uint32_t bench_speed();
+
 /** @addtogroup STM32F4xx_HAL_Examples
   * @{
   */
@@ -108,15 +110,17 @@ int main(void)
     Error_Handler(); 
   }
 
-  unsigned long t1 = get_cycle_count();
-  volatile int loopCount = 1000;
+  for (int i = 0; i < 20; i++){
 
-  while (loopCount--);
+    unsigned long t1 = get_cycle_count();
 
-  unsigned long t2 = get_cycle_count();
+    bench_speed();
 
-  /* Output a message on Hyperterminal using printf function */
-  printf("\n\r Cycles: %lu\n\r", t2 - t1);
+    unsigned long t2 = get_cycle_count();
+
+    printf("\n\r Cycles: %lu\n\r", t2 - t1);
+
+  }
 
   /* Infinite loop */ 
   while (1)
