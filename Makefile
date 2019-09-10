@@ -85,4 +85,7 @@ clean:
 	rm -f lib/libstm32f4xxhal.a		\
 	      lib/libstm32f4xxbsp.a		\
 	      $(BSP_LIB_OBJS) $(HAL_LIB_OBJS)	\
-	      $(SRC_OBJS)
+	      $(SRC_OBJS) out.elf
+
+clean-all:
+	make clean; rm out.hex
