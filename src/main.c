@@ -110,24 +110,18 @@ int main(void)
     Error_Handler(); 
   }
 
+  printf("run; cycles; c/B\n");
   for (int i = 0; i < 20; i++){
 
-    printf("[Run: %d] ", i);
-
     unsigned long t1 = get_cycle_count();
+    int len = bench_speed();
+    unsigned long cycles = get_cycle_count() - t1;
 
-    bench_speed();
-
-    unsigned long t2 = get_cycle_count();
-
-    printf("%lu cycles\n\r", t2 - t1);
+    printf("%i; %lu; %lu\n", i, cycles, cycles/len);
 
   }
 
-  /* Infinite loop */ 
-  while (1)
-  {
-  }
+  while (1) {}
 }
 
 /**

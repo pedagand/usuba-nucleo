@@ -42,12 +42,16 @@ INCLUDES=-I./inc							\
 
 ################################################################
 
-all: out.hex
+all:
+	make $(patsubst %,results/bench_b_%.dat,$(CIPHERS))
+	make $(patsubst %,results/bench_v_%.dat,$(CIPHERS))
 
 %.o: %.c
 	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $<
 %.o: %.s
 	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $<
+
+.PRECIOUS: %.o
 
 # HAL library
 
@@ -80,6 +84,8 @@ SRC_OBJS = $(patsubst %.s,%.o, $(patsubst %.c,%.o, $(SRC_FILES)))
 %.hex: %.elf
 	objcopy -Oihex $*.elf $*.hex
 
+CIPHERS=ace photon ascon pyjamask gift skinny clyde gimli
+
 DRIVERS=usuba/nist/ace/usuba/bench/ace_ua_bitslice.c			\
 	usuba/nist/ace/usuba/bench/ace_ua_vslice.c			\
 	usuba/nist/photon/usuba/bench/photon_ua_bitslice.c	\
@@ -99,19 +105,19 @@ DRIVERS=usuba/nist/ace/usuba/bench/ace_ua_bitslice.c			\
 DRIVERS_OBJ=$(patsubst %.c,%.o, $(DRIVERS))
 
 
-benchmark_bitslice_%.elf benchmark_vslice_%.elf: $(DRIVERS_OBJ) $(SRC_OBJS) lib/libstm32f4xxhal.a lib/libstm32f4xxbsp.a
+b_%.elf v_%.elf: $(DRIVERS_OBJ) $(SRC_OBJS) lib/libstm32f4xxhal.a lib/libstm32f4xxbsp.a
 	$(CC) $(CFLAGS) -T$(LINKER_FILE)			\
 		usuba/nist/$*/usuba/bench/$*_ua_bitslice.o      \
 		src/stm32f4xx_it.o src/stm32f4xx_hal_msp.o	\
 		src/syscalls.o src/system_stm32f4xx.o		\
 		src/startup_stm32f401xe.o src/main.o		\
-		 -o benchmark_bitslice_$*.elf $(LD_FLAGS)
+		 -o b_$*.elf $(LD_FLAGS)
 	$(CC) $(CFLAGS) -T$(LINKER_FILE)			\
 		usuba/nist/$*/usuba/bench/$*_ua_vslice.o        \
 		src/stm32f4xx_it.o src/stm32f4xx_hal_msp.o	\
 		src/syscalls.o src/system_stm32f4xx.o		\
 		src/startup_stm32f401xe.o src/main.o		\
-		 -o benchmark_vslice_$*.elf $(LD_FLAGS)
+		 -o v_$*.elf $(LD_FLAGS)
 
 ################################################################
 
@@ -120,19 +126,19 @@ clean:
 	      lib/libstm32f4xxbsp.a		\
 	      $(BSP_LIB_OBJS) $(HAL_LIB_OBJS)	\
 	      $(SRC_OBJS)			\
-	      benchmark_bitslice_*.elf		\
-	      benchmark_vslice_*.elf
+	      b_*.elf		\
+	      v_*.elf
 
 clean-all:
 	make clean; \
-	rm -f benchmark_bitslice_*.hex benchmark_vslice_*.hex
+	rm -f b_*.hex v_*.hex
 
 ################################################################
 
 upload-%:
-	make benchmark_$(subst -,_,$*).hex
+	make $*.hex
 	sudo $(OPENOCD) -f /usr/share/openocd/scripts/board/st_nucleo_f4.cfg \
-	                -c "init; reset halt; flash write_image erase benchmark_$(subst -,_,$*).hex; reset run; exit"
+	                -c "init; reset halt; flash write_image erase $*.hex; reset run; exit"
 
 reboot:
 	sudo $(OPENOCD) -f /usr/share/openocd/scripts/board/st_nucleo_f4.cfg \
@@ -140,8 +146,14 @@ reboot:
 read:
 	sudo $(SCREEN) /dev/ttyACM0 9600,cs7,ixoff
 
-load-%:
-	make && make upload-$* && make read
+save-%:
+	./bin/serial.sh $*
+
+results/bench_%.dat: force
+	make upload-$* && make save-$*
+
+force:
+	true
 
 ################################################################
 
