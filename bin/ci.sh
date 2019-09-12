@@ -1,15 +1,24 @@
 #!/bin/bash
 
+if [[ -f "ci.lock" ]]; then
+    # A benchmark is already running
+    exit 0
+fi
+
+touch ci.lock
+
 cd usuba/
 
 current_commit=`git rev-parse HEAD`
-git pull
+git pull &>/dev/null
 
 new_commits=`git log --pretty=%P $current_commit.. nist/`
 new_head=`git rev-parse HEAD`
 
 if [[ "$new_head" == "$current_commit" ]]; then
     # Nothing to be done
+    rm -f ../ci.lock
+
     exit 0
 fi
 
@@ -39,3 +48,5 @@ done
 
 cd ..
 git push
+
+rm -f ci.lock
