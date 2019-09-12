@@ -131,7 +131,7 @@ clean:
 
 clean-all:
 	make clean; \
-	rm -f b_*.hex v_*.hex
+	rm -f results/*.dat b_*.hex v_*.hex
 
 ################################################################
 
