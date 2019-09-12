@@ -25,6 +25,8 @@ for commit in $new_commits $new_head; do
 
     make clean-all
     make
+    echo $commit > results/timestamp
+    git add results/timestamp
     git add results/*.dat
     git commit -m "Benchmark $short_commit"
 
