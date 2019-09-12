@@ -86,26 +86,13 @@ SRC_OBJS = $(patsubst %.s,%.o, $(patsubst %.c,%.o, $(SRC_FILES)))
 %.hex: %.elf
 	objcopy -Oihex $*.elf $*.hex
 
-DRIVERS=usuba/nist/ace/usuba/bench/ace_ua_bitslice.c			\
-	usuba/nist/ace/usuba/bench/ace_ua_vslice.c			\
-	usuba/nist/photon/usuba/bench/photon_ua_bitslice.c	\
-	usuba/nist/photon/usuba/bench/photon_ua_vslice.c		\
-	usuba/nist/ascon/usuba/bench/ascon_ua_bitslice.c		\
-	usuba/nist/ascon/usuba/bench/ascon_ua_vslice.c			\
-	usuba/nist/pyjamask/usuba/bench/pyjamask_ua_bitslice.c		\
-        usuba/nist/pyjamask/usuba/bench/pyjamask_ua_vslice.c		\
-	usuba/nist/gift/usuba/bench/gift_ua_bitslice.c		\
-	usuba/nist/gift/usuba/bench/gift_ua_vslice.c		\
-	usuba/nist/skinny/usuba/bench/skinny_ua_bitslice.c		\
-	usuba/nist/skinny/usuba/bench/skinny_ua_vslice.c		\
-	usuba/nist/clyde/usuba/bench/clyde_ua_bitslice.c		\
-        usuba/nist/clyde/usuba/bench/clyde_ua_vslice.c			\
-	usuba/nist/gimli/usuba/bench/gimli_ua_bitslice.c		\
-	usuba/nist/gimli/usuba/bench/gimli_ua_vslice.c
-DRIVERS_OBJ=$(patsubst %.c,%.o, $(DRIVERS))
+DRIVER_OBJS=$(foreach cipher, $(CIPHERS),				\
+	      usuba/nist/$(cipher)/usuba/bench/$(cipher)_ua_vslice.o	\
+	      usuba/nist/$(cipher)/usuba/bench/$(cipher)_ua_bitslice.o)
 
+drivers: $(DRIVER_OBJS)
 
-b_%.elf v_%.elf: $(DRIVERS_OBJ) $(SRC_OBJS) lib/libstm32f4xxhal.a lib/libstm32f4xxbsp.a
+b_%.elf v_%.elf: $(DRIVER_OBJS) $(SRC_OBJS) lib/libstm32f4xxhal.a lib/libstm32f4xxbsp.a
 	$(CC) $(CFLAGS) -T$(LINKER_FILE)			\
 		usuba/nist/$*/usuba/bench/$*_ua_bitslice.o      \
 		src/stm32f4xx_it.o src/stm32f4xx_hal_msp.o	\
@@ -127,7 +114,8 @@ clean:
 	      lib/libstm32f4xxbsp.a		\
 	      $(BSP_LIB_OBJS) $(HAL_LIB_OBJS)	\
 	      $(SRC_OBJS)			\
-	      b_*.elf		\
+	      $(DRIVER_OBJS)			\
+	      b_*.elf				\
 	      v_*.elf
 
 clean-all:
