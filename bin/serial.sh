@@ -1,7 +1,9 @@
 #!/bin/bash
 
 sudo cat /dev/ttyACM0 > results/bench_$1.dat &
-CATPID=$!
 sleep 1
-# TODO: fix to kill just the one cat
-sudo killall cat
+# Get the pid of `cat` (not `sudo cat`)
+CATPID=`ps --ppid $! -o pid=`
+sleep 4
+# Kill the cat!
+sudo kill $CATPID
