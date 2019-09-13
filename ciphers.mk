@@ -1,1 +1,11 @@
-CIPHERS=ace photon ascon pyjamask gift skinny clyde gimli drygascon spongent
+CIPHERS=ace		\
+	photon		\
+	ascon		\
+	pyjamask	\
+	gift		\
+	skinny		\
+	clyde		\
+	gimli		\
+	drygascon	\
+	spongent	\
+	subterranean
