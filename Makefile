@@ -43,7 +43,7 @@ INCLUDES=-I./inc							\
 ################################################################
 # Compile the benchmark results
 
-CIPHERS=ace photon ascon pyjamask gift skinny clyde gimli drygascon
+include ciphers.mk
 
 all:
 	make $(patsubst %,results/bench_b_%.dat,$(CIPHERS))
