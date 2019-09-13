@@ -43,7 +43,7 @@ INCLUDES=-I./inc							\
 ################################################################
 # Compile the benchmark results
 
-CIPHERS=ace photon ascon pyjamask gift skinny clyde gimli
+CIPHERS=ace photon ascon pyjamask gift skinny clyde gimli drygascon
 
 all:
 	make $(patsubst %,results/bench_b_%.dat,$(CIPHERS))
