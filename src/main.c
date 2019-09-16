@@ -111,7 +111,7 @@ int main(void)
   }
 
   printf("run; cycles; c/B\n");
-  for (int i = 0; i < 20; i++){
+  for (int i = 0; i < 3; i++){
 
     unsigned long t1 = get_cycle_count();
     int len = bench_speed();
