@@ -1,6 +1,6 @@
 #!/bin/bash
 
-sudo cat /dev/ttyACM0 > results/bench_$1.dat &
+sudo cat -v /dev/ttyACM0 > $1 &
 sleep 1
 # Get the pid of `cat` (not `sudo cat`)
 CATPID=`ps --ppid $! -o pid=`

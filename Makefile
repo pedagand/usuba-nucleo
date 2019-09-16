@@ -45,9 +45,19 @@ INCLUDES=-I./inc							\
 
 include ciphers.mk
 
+
 all:
-	make $(patsubst %,results/bench_b_%.dat,$(CIPHERS))
-	make $(patsubst %,results/bench_v_%.dat,$(CIPHERS))
+	for cipher in $(CIPHERS);							\
+	do										\
+	  for mode in bitslice vslice;							\
+	  do										\
+	    make results/bench_"$$cipher"_"$$mode".dat;					\
+	    for masking_order in $(MASKING_ORDERS);					\
+	    do                                                                          \
+	      make results/bench_masked_"$$masking_order"_"$$cipher"_"$$mode".dat;	\
+	    done;									\
+	  done;										\
+        done
 
 ################################################################
 # Global setup
@@ -86,25 +96,33 @@ SRC_OBJS = $(patsubst %.s,%.o, $(patsubst %.c,%.o, $(SRC_FILES)))
 %.hex: %.elf
 	objcopy -Oihex $*.elf $*.hex
 
-DRIVER_OBJS=$(foreach cipher, $(CIPHERS),				\
-	      usuba/nist/$(cipher)/usuba/bench/$(cipher)_ua_vslice.o	\
-	      usuba/nist/$(cipher)/usuba/bench/$(cipher)_ua_bitslice.o)
+DRIVER_OBJS=$(foreach MODE, vslice bitslice,								\
+	    $(foreach CIPHER, $(CIPHERS),								\
+	      usuba/nist/$(CIPHER)/usuba/bench/$(CIPHER)_ua_$(MODE).o					\
+	      $(foreach MASKING_ORDER, $(MASKING_ORDERS),						\
+	        usuba/nist/$(CIPHER)/usuba/bench/masked_$(MASKING_ORDER)_$(CIPHER)_ua_$(MODE).o )))
 
 drivers: $(DRIVER_OBJS)
 
-b_%.elf v_%.elf: $(DRIVER_OBJS) $(SRC_OBJS) lib/libstm32f4xxhal.a lib/libstm32f4xxbsp.a
-	$(CC) $(CFLAGS) -T$(LINKER_FILE)			\
-		usuba/nist/$*/usuba/bench/$*_ua_bitslice.o      \
-		src/stm32f4xx_it.o src/stm32f4xx_hal_msp.o	\
-		src/syscalls.o src/system_stm32f4xx.o		\
-		src/startup_stm32f401xe.o src/main.o		\
-		 -o b_$*.elf $(LD_FLAGS)
-	$(CC) $(CFLAGS) -T$(LINKER_FILE)			\
-		usuba/nist/$*/usuba/bench/$*_ua_vslice.o        \
-		src/stm32f4xx_it.o src/stm32f4xx_hal_msp.o	\
-		src/syscalls.o src/system_stm32f4xx.o		\
-		src/startup_stm32f401xe.o src/main.o		\
-		 -o v_$*.elf $(LD_FLAGS)
+define masked-vars-rule
+usuba/nist/$(CIPHER)/usuba/bench/masked_$(MASKING_ORDER)_$(CIPHER)_ua_$(MODE).o: usuba/nist/$(CIPHER)/usuba/bench/masked_$(CIPHER)_ua_$(MODE).c
+	$(CC) $(CFLAGS) $(INCLUDES)								\
+	  -D MASKING_ORDER=$(MASKING_ORDER)							\
+	  -c usuba/nist/$(CIPHER)/usuba/bench/masked_$(CIPHER)_ua_$(MODE).c			\
+          -o usuba/nist/$(CIPHER)/usuba/bench/masked_$(MASKING_ORDER)_$(CIPHER)_ua_$(MODE).o
+endef
+
+$(foreach CIPHER, $(CIPHERS),			\
+$(foreach MASKING_ORDER, $(MASKING_ORDERS),	\
+$(foreach MODE, bitslice vslice,		\
+$(eval $(masked-vars-rule)))))
+
+%.elf: %.o $(SRC_OBJS) lib/libstm32f4xxhal.a lib/libstm32f4xxbsp.a
+	$(CC) $(CFLAGS) -T$(LINKER_FILE) $<					\
+		src/stm32f4xx_it.o src/stm32f4xx_hal_msp.o			\
+		src/syscalls.o src/system_stm32f4xx.o				\
+		src/startup_stm32f401xe.o src/main.o				\
+		 -o $@ $(LD_FLAGS)
 
 ################################################################
 # Cleaning
@@ -135,18 +153,32 @@ read:
 	sudo $(SCREEN) /dev/ttyACM0 9600,cs7,ixoff
 
 # Load .hex file to the board
-upload-%:
-	make $*.hex
+%.upload: %.hex
 	sudo $(OPENOCD) -f /usr/share/openocd/scripts/board/st_nucleo_f4.cfg \
-	                -c "init; reset halt; flash write_image erase $*.hex; reset run; exit"
+	                -c "init; reset halt; flash write_image erase $<; reset run; exit"
 
 # Save serial input to the given file
-save-%:
-	./bin/serial.sh $*
+%.log: %.hex
+	sudo $(OPENOCD) -f /usr/share/openocd/scripts/board/st_nucleo_f4.cfg \
+	                -c "init; reset halt; flash write_image erase $<; reset run; exit"
+	./bin/serial.sh $@
 
 # Run the benchmark for the given cipher
-results/bench_%.dat: force
-	make upload-$* && make save-$*
+define bench-raw-vars-rule
+results/bench_$(CIPHER)_$(MODE).dat: usuba/nist/$(CIPHER)/usuba/bench/$(CIPHER)_ua_$(MODE).log
+	cp $$< $$@
+endef
+
+define bench-masked-vars-rule
+results/bench_masked_$(MASKING_ORDER)_$(CIPHER)_$(MODE).dat: usuba/nist/$(CIPHER)/usuba/bench/masked_$(MASKING_ORDER)_$(CIPHER)_ua_$(MODE).log
+	cp $$< $$@
+endef
+
+$(foreach CIPHER, $(CIPHERS),			\
+$(foreach MODE, bitslice vslice,		\
+$(eval $(bench-raw-vars-rule))			\
+$(foreach MASKING_ORDER, $(MASKING_ORDERS),	\
+$(eval $(bench-masked-vars-rule)))))
 
 force:
 	true
