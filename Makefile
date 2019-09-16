@@ -21,7 +21,8 @@ CFLAGS=-Wall		\
 	-mthumb		\
 	-Os		\
 	-DSTM32F401xE	#\
-	#-ggdb
+#       -fstack-usage   \
+#       -ggdb
 
 INCLUDES=-I./inc							\
 	  -I./usuba/arch                                                \
@@ -47,6 +48,7 @@ include ciphers.mk
 
 
 all:
+	make -j4 drivers;                                                               \
 	for cipher in $(CIPHERS);							\
 	do										\
 	  for mode in bitslice vslice;							\
