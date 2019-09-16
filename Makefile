@@ -20,7 +20,8 @@ CFLAGS=-Wall		\
 	-mlittle-endian \
 	-mthumb		\
 	-Os		\
-	-DSTM32F401xE	#\
+	-DSTM32F401xE   \
+	-DNUCLEO	#\
 #       -fstack-usage   \
 #       -ggdb
 
@@ -48,7 +49,7 @@ include ciphers.mk
 
 
 all:
-	make -j4 drivers;                                                               \
+	make -j12 drivers;                                                               \
 	for cipher in $(CIPHERS);							\
 	do										\
 	  for mode in bitslice vslice;							\
