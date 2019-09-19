@@ -19,7 +19,7 @@ CFLAGS=-Wall		\
 	-mcpu=cortex-m4 \
 	-mlittle-endian \
 	-mthumb		\
-	-Os		\
+	-O3		\
 	-DSTM32F401xE   \
 	-DNUCLEO	#\
 #       -fstack-usage   \
