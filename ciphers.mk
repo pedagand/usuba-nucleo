@@ -8,6 +8,7 @@ CIPHERS=ace		\
 	gimli		\
 	drygascon	\
 	spongent	\
-	subterranean
+	subterranean    \
+	xoodoo
 
 MASKING_ORDERS=4 8 16 32 64 128
