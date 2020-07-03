@@ -68,6 +68,12 @@ static unsigned long get_cycle_count();
 
 /* Private functions ---------------------------------------------------------*/
 
+#ifdef POOLING
+void init_rand();
+unsigned long waited;
+unsigned long last_rand;
+#endif
+
 /**
   * @brief  Main program
   * @param  None
@@ -114,10 +120,18 @@ int main(void)
   for (int i = 0; i < 3; i++){
 
     unsigned long t1 = get_cycle_count();
+#ifdef POOLING
+    last_rand = t1;
+    waited = 0;
+#endif
     int len = bench_speed();
     unsigned long cycles = get_cycle_count() - t1;
 
-    printf("%i; %lu; %lu\n", i, cycles, cycles/len);
+#ifdef POOLING
+    cycles += waited;
+#endif
+    
+    printf("%i; %lu; %lu; (%lu)\n", i, cycles, cycles/len, waited);
 
   }
 
