@@ -8,6 +8,8 @@ CIPHERS=ace		\
 	gimli		\
 	spongent	\
 	subterranean    \
-	xoodoo
+	xoodoo	\
+	aes	\
+	present
 
 MASKING_ORDERS=4 8 16 32 64 128
