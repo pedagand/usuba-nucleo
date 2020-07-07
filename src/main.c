@@ -1,8 +1,8 @@
 /**
   ******************************************************************************
-  * @file    UART/UART_Printf/Src/main.c 
+  * @file    UART/UART_Printf/Src/main.c
   * @author  MCD Application Team
-  * @brief   This example shows how to retarget the C library printf function 
+  * @brief   This example shows how to retarget the C library printf function
   *          to the UART.
   ******************************************************************************
   * @attention
@@ -45,7 +45,7 @@ extern uint32_t bench_speed();
 
 /** @addtogroup UART_Printf
   * @{
-  */ 
+  */
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -88,10 +88,10 @@ int main(void)
        - Global MSP (MCU Support Package) initialization
      */
   HAL_Init();
-  
+
   /* Configure the system clock to 84 MHz */
   SystemClock_Config();
-   
+
   /*##-1- Configure the UART peripheral ######################################*/
   /* Put the USART peripheral in the Asynchronous mode (UART Mode) */
   /* UART1 configured as follow:
@@ -101,7 +101,7 @@ int main(void)
       - BaudRate = 9600 baud
       - Hardware flow control disabled (RTS and CTS signals) */
   UartHandle.Instance          = USARTx;
-  
+
   UartHandle.Init.BaudRate     = 9600;
   UartHandle.Init.WordLength   = UART_WORDLENGTH_8B;
   UartHandle.Init.StopBits     = UART_STOPBITS_1;
@@ -109,11 +109,11 @@ int main(void)
   UartHandle.Init.HwFlowCtl    = UART_HWCONTROL_NONE;
   UartHandle.Init.Mode         = UART_MODE_TX_RX;
   UartHandle.Init.OverSampling = UART_OVERSAMPLING_16;
-    
+
   if(HAL_UART_Init(&UartHandle) != HAL_OK)
   {
     /* Initialization Error */
-    Error_Handler(); 
+    Error_Handler();
   }
 
   printf("run; cycles; c/B\n");
@@ -129,9 +129,10 @@ int main(void)
 
 #ifdef POOLING
     cycles += waited;
-#endif
-    
     printf("%i; %lu; %lu; (%lu)\n", i, cycles, cycles/len, waited);
+#endif
+
+    printf("%i; %lu; %lu;\n", i, cycles, cycles/len);
 
   }
 
@@ -147,14 +148,14 @@ PUTCHAR_PROTOTYPE
 {
   /* Place your implementation of fputc here */
   /* e.g. write a character to the EVAL_COM1 and Loop until the end of transmission */
-  HAL_UART_Transmit(&UartHandle, (uint8_t *)&ch, 1, 0xFFFF); 
+  HAL_UART_Transmit(&UartHandle, (uint8_t *)&ch, 1, 0xFFFF);
 
   return ch;
 }
 
 /**
   * @brief  System Clock Configuration
-  *         The system Clock is configured as follow : 
+  *         The system Clock is configured as follow :
   *            System Clock source            = PLL (HSI)
   *            SYSCLK(Hz)                     = 84000000
   *            HCLK(Hz)                       = 84000000
@@ -179,12 +180,12 @@ static void SystemClock_Config(void)
 
   /* Enable Power Control clock */
   __HAL_RCC_PWR_CLK_ENABLE();
-  
-  /* The voltage scaling allows optimizing the power consumption when the device is 
-     clocked below the maximum system frequency, to update the voltage scaling value 
+
+  /* The voltage scaling allows optimizing the power consumption when the device is
+     clocked below the maximum system frequency, to update the voltage scaling value
      regarding system frequency refer to product datasheet.  */
   __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE2);
-  
+
   /* Enable HSI Oscillator and activate PLL with HSI as source */
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
@@ -199,14 +200,14 @@ static void SystemClock_Config(void)
   {
     Error_Handler();
   }
- 
-  /* Select PLL as system clock source and configure the HCLK, PCLK1 and PCLK2 
+
+  /* Select PLL as system clock source and configure the HCLK, PCLK1 and PCLK2
      clocks dividers */
   RCC_ClkInitStruct.ClockType = (RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2);
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;  
-  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;  
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
   if(HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
   {
     Error_Handler();
@@ -236,7 +237,7 @@ static void Error_Handler(void)
   * @retval None
   */
 void assert_failed(uint8_t* file, uint32_t line)
-{ 
+{
   /* User can add his own implementation to report the file name and line number,
      ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
 
@@ -249,11 +250,11 @@ void assert_failed(uint8_t* file, uint32_t line)
 
 /**
   * @}
-  */ 
+  */
 
 /**
   * @}
-  */ 
+  */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
 
