@@ -6,7 +6,6 @@ CIPHERS=ace		\
 	skinny		\
 	clyde		\
 	gimli		\
-	drygascon	\
 	spongent	\
 	subterranean    \
 	xoodoo
