@@ -16,11 +16,14 @@ LD_FLAGS=-L${LIBDIR}		\
           -Wl,--gc-sections
 
 CFLAGS=-Wall		\
+	-Wno-missing-braces	\
+	-Wno-unused-function \
 	-mcpu=cortex-m4 \
 	-mlittle-endian \
 	-mthumb		\
-	-Os		\
+	-O3		\
 	-DSTM32F401xE   \
+	-std=gnu11	\
 	-DNUCLEO	#\
 #       -fstack-usage   \
 #       -ggdb
