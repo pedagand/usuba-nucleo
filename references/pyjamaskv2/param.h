@@ -2,12 +2,12 @@
   ===============================================================================
 
  Copyright (c) 2019, CryptoExperts and PQShield Ltd.
- 
+
  All rights reserved. A copyright license for redistribution and use in
  source and binary forms, with or without modification, is hereby granted for
  non-commercial, experimental, research, public review and evaluation
  purposes, provided that the following conditions are met:
- 
+
  * Redistributions of source code must retain the above copyright notice,
    this list of conditions and the following disclaimer.
 
@@ -36,7 +36,7 @@
 #ifndef _PARAM_H_
 #define _PARAM_H_
 
-#define MASKING_ORDER  4
+// #define MASKING_ORDER  4
 
 // RNG Constants
 #define addr_rng 0x50060808
